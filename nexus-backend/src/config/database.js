@@ -30,6 +30,19 @@ async function query(text, params) {
   return result;
 }
 
+async function queryWithRetry(text, params, retries = 3) {
+  for (let i = 1; i <= retries; i++) {
+    try {
+      return await query(text, params);
+    } catch (err) {
+      const isTimeout = err.message && (err.message.includes('timeout') || err.message.includes('terminated'));
+      if (!isTimeout || i === retries) throw err;
+      console.warn(`[DB] Retry ${i}/${retries} after timeout on: ${text.substring(0, 60)}`);
+      await new Promise(r => setTimeout(r, 2000 * i));
+    }
+  }
+}
+
 async function getClient() {
   return getPool().connect();
 }
@@ -42,4 +55,4 @@ async function initDb() {
   console.log('[DB] Schema initialized on Neon PostgreSQL');
 }
 
-module.exports = { query, getClient, getPool, initDb };
+module.exports = { query, queryWithRetry, getClient, getPool, initDb };

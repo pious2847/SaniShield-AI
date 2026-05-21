@@ -79,7 +79,9 @@
       "Bash(curl -s \"http://localhost:5000/api/v1/map/vulnerability?district=Tamale%20Metro\")",
       "Bash(python3 -c \"import sys,json; print\\('ok'\\)\")",
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('v='+d.get\\('version','?'\\),'status='+d.get\\('status','?'\\)\\)\")",
-      "Bash(curl -s \"http://localhost:5000/api/v1/toilets?limit=1\")"
+      "Bash(curl -s \"http://localhost:5000/api/v1/toilets?limit=1\")",
+      "Bash(pnpm --version)",
+      "Bash(bun --version)"
     ]
   }
 }

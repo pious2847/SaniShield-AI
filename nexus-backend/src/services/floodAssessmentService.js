@@ -1,6 +1,6 @@
 const FloodAssessment = require('../models/FloodAssessment');
 const WeatherHistory = require('../models/WeatherHistory');
-const { query } = require('../config/database');
+const { queryWithRetry: query } = require('../config/database');
 const broadcastService = require('./broadcastService');
 
 const FLOOD_THRESHOLD_MM = 25;
@@ -16,17 +16,17 @@ async function _buildAssessment(district, rainfallMm, triggerType, io) {
     trigger_threshold_mm: FLOOD_THRESHOLD_MM,
   });
 
-  // Flag high/critical flood-zone toilets
+  // Flag all toilets in district (registered_toilets has no flood_zone_risk column)
   const { rows: toilets } = await query(
     `SELECT id, owner_name AS name, district, community, latitude, longitude
      FROM registered_toilets
-     WHERE district=$1 AND flood_zone_risk IN ('high','critical')`,
+     WHERE district=$1 AND latitude IS NOT NULL`,
     [district]
   );
 
-  // Flag high/critical sanitation units
+  // Flag high/critical flood-zone sanitation units
   const { rows: units } = await query(
-    `SELECT id, name, district, community, latitude, longitude
+    `SELECT id, name, district, location_name AS community, latitude, longitude
      FROM sanitation_units
      WHERE district=$1 AND flood_zone_risk IN ('high','critical')`,
     [district]
