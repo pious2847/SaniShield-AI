@@ -5,6 +5,7 @@ const router = express.Router();
 
 router.get('/layers', ctrl.allLayers);
 router.get('/toilets', ctrl.toilets);
+router.get('/units', ctrl.sanitationUnits);
 router.get('/gatherers', ctrl.gatherers);
 router.get('/dumps', ctrl.dumps);
 router.get('/facilities', ctrl.facilities);

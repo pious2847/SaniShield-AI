@@ -103,6 +103,27 @@ async function alerts(req, res, next) {
   } catch (e) { next(e); }
 }
 
+async function sanitationUnits(req, res, next) {
+  try {
+    const { district } = req.query;
+    let sql = `SELECT id, name, district, location_name, latitude, longitude,
+                      status, flood_zone_risk, unit_type, is_school, school_name,
+                      vulnerability_score, capacity
+               FROM sanitation_units WHERE latitude IS NOT NULL AND longitude IS NOT NULL`;
+    const params = [];
+    if (district) { sql += ` AND district=$1`; params.push(district); }
+    sql += ' ORDER BY created_at DESC LIMIT 500';
+    const { rows } = await query(sql, params);
+    const features = rows.map(r => toFeature(r, { lat: 'latitude', lon: 'longitude' }, {
+      id: r.id, name: r.name, district: r.district, community: r.location_name,
+      unit_type: r.unit_type, status: r.status, flood_zone_risk: r.flood_zone_risk,
+      is_school: r.is_school, school_name: r.school_name,
+      vulnerability_score: r.vulnerability_score, capacity: r.capacity, layer: 'units',
+    }));
+    res.json(fc(features, { layer: 'sanitation_units' }));
+  } catch (e) { next(e); }
+}
+
 async function heatmap(req, res, next) {
   try {
     const type = req.params.type;
@@ -245,4 +266,4 @@ async function allLayers(req, res, next) {
   } catch (e) { next(e); }
 }
 
-module.exports = { toilets, gatherers, dumps, facilities, alerts, heatmap, allLayers, vulnerabilityLayer };
+module.exports = { toilets, gatherers, dumps, facilities, alerts, sanitationUnits, heatmap, allLayers, vulnerabilityLayer };

@@ -1,18 +1,26 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type { Alert, HealthScore, SludgeJob, FloodAssessment, DistrictStats } from "@/types";
 
 export function useHealthScore(district: string) {
-  return useQuery<HealthScore>({
+  return useQuery<HealthScore | null>({
     queryKey: ["health-score", district],
     queryFn: async () => {
-      const { data } = await api.get(`/health-scores/${encodeURIComponent(district)}`);
-      return data.data;
+      try {
+        const { data } = await api.get(`/health-scores/${encodeURIComponent(district)}`);
+        return data.data ?? null;
+      } catch (err: unknown) {
+        // 404 means no score computed yet — not a fatal error
+        const status = (err as { response?: { status?: number } })?.response?.status;
+        if (status === 404) return null;
+        throw err;
+      }
     },
     enabled: !!district,
     staleTime: 5 * 60 * 1000,
+    retry: false,
   });
 }
 
@@ -62,6 +70,22 @@ export function useToilets(district?: string) {
       return data.data ?? [];
     },
     staleTime: 2 * 60 * 1000,
+  });
+}
+
+export function useAcknowledgeAlert(district?: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (alertId: string) => api.patch(`/alerts/${alertId}/acknowledge`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["alerts", district] }),
+  });
+}
+
+export function useResolveAlert(district?: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (alertId: string) => api.patch(`/alerts/${alertId}/resolve`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["alerts", district] }),
   });
 }
 

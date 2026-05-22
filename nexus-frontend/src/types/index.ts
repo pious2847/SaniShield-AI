@@ -16,16 +16,27 @@ export interface Alert {
   message: string;
   status: "active" | "acknowledged" | "resolved";
   created_at: string;
+  acknowledged_at?: string;
+  resolved_at?: string;
   unit_name?: string;
   community?: string;
+  prediction_data?: {
+    risk_level?: string;
+    risk_score?: number;
+    predicted_overflow_hours?: number | null;
+    reasoning?: string;
+    recommendations?: string[];
+    sms_message?: string | null;
+  };
 }
 
 export interface HealthScore {
-  id: string;
+  id: string | null;
   district: string;
-  score: number;
+  score: number | null;
   ai_narrative: string;
-  calculated_at: string;
+  computed_at: string;
+  pending?: boolean;
 }
 
 export interface SludgeJob {

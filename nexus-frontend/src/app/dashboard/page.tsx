@@ -125,7 +125,7 @@ export default function DashboardPage() {
           <p className={sectionLabel}>District Health Score</p>
           {hsLoading ? (
             <div className="flex justify-center py-8"><PageSpinner /></div>
-          ) : hs ? (
+          ) : hs && hs.score != null ? (
             <div className="flex flex-col sm:flex-row gap-6 items-start">
               <div className="flex-shrink-0">
                 <HealthRing score={hs.score} label={district} size={160} />
@@ -133,7 +133,7 @@ export default function DashboardPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-xs font-body text-[var(--color-text-3)] dark:text-[var(--color-text-3-dark)]">
-                    Last calculated {timeAgo(hs.calculated_at)}
+                    Last calculated {timeAgo(hs.computed_at)}
                   </span>
                 </div>
                 <blockquote className="border-l-2 border-[var(--color-primary)] pl-4 py-1">
@@ -158,9 +158,15 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
+          ) : hs?.pending ? (
+            <div className="flex flex-col items-center justify-center py-10 text-center gap-2">
+              <span className="w-8 h-8 rounded-full border-2 border-[var(--color-primary)] border-t-transparent animate-spin" />
+              <p className="text-sm font-body text-[var(--color-text-2)] dark:text-[var(--color-text-2-dark)] font-medium">Computing health score…</p>
+              <p className="text-xs font-body text-[var(--color-text-3)] dark:text-[var(--color-text-3-dark)]">{hs.ai_narrative}</p>
+            </div>
           ) : (
             <p className="text-sm font-body text-[var(--color-text-3)] dark:text-[var(--color-text-3-dark)] text-center py-8">
-              No health score available for {district}.
+              No health score available for {district} yet.
             </p>
           )}
         </div>

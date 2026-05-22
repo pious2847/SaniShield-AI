@@ -105,9 +105,19 @@ async function report(req, res, next) {
       routedTo = 'registered_toilet';
 
     } else {
-      // Default: sanitation_issue, flood_risk, or any other type → CommunityReport
+      // Normalise report_type to allowed DB values
+      const VALID_REPORT_TYPES = ['overflow','damage','hygiene_issue','flooding','blocked','security','other'];
+      const TYPE_MAP = {
+        toilet_condition: 'hygiene_issue', sanitation_issue: 'hygiene_issue',
+        flood_risk: 'flooding', water_contamination: 'hygiene_issue',
+        waste_overflow: 'overflow', blocked_drain: 'blocked',
+      };
+      const normalised = VALID_REPORT_TYPES.includes(report_type)
+        ? report_type
+        : (TYPE_MAP[report_type] || 'other');
+
       result = await CommunityReport.create({
-        report_type: report_type,
+        report_type: normalised,
         description, severity: severity||'moderate',
         reporter_name, reporter_phone,
         latitude: lat, longitude: lon,

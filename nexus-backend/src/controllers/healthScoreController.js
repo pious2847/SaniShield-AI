@@ -1,5 +1,5 @@
 const CommunityHealthScore = require('../models/CommunityHealthScore');
-const { computeAllDistricts, computeForDistrict } = require('../services/healthScoreService');
+const { computeAllDistricts, computeForDistrict, DISTRICTS } = require('../services/healthScoreService');
 
 async function all(req, res, next) {
   try {
@@ -11,8 +11,25 @@ async function all(req, res, next) {
 
 async function forDistrict(req, res, next) {
   try {
-    const row = await CommunityHealthScore.latestForDistrict(req.params.district);
-    if (!row) return res.status(404).json({ success: false, message: 'No score found for district' });
+    let row = await CommunityHealthScore.latestForDistrict(req.params.district);
+    if (!row) {
+      const validDistrict = DISTRICTS.includes(req.params.district);
+      if (!validDistrict) return res.status(404).json({ success: false, message: 'Unknown district' });
+      try {
+        row = await computeForDistrict(req.params.district);
+      } catch (computeErr) {
+        console.error('[HealthScore] on-demand compute error:', computeErr.message);
+        // Return a synthetic pending score so the frontend renders rather than errors
+        return res.json({
+          success: true,
+          data: {
+            id: null, district: req.params.district,
+            score: null, ai_narrative: 'Health score is being computed for the first time. Refresh in a moment.',
+            components: {}, computed_at: new Date().toISOString(), pending: true,
+          },
+        });
+      }
+    }
     res.json({ success: true, data: CommunityHealthScore.parse(row) });
   } catch (e) { next(e); }
 }

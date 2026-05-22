@@ -114,7 +114,11 @@
       "Bash(curl -s -X POST \"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyAlQ5ZX54SReTyxGp3oV7P5pR5Ilb6OsUg\" -H \"Content-Type: application/json\" -d \"{\\\\\"contents\\\\\":[{\\\\\"parts\\\\\":[{\\\\\"text\\\\\":\\\\\"Say OK\\\\\"}]}]}\")",
       "Bash(curl -s -X POST \"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyAlQ5ZX54SReTyxGp3oV7P5pR5IIb6OsUg\" -H \"Content-Type: application/json\" -d \"{\\\\\"contents\\\\\":[{\\\\\"parts\\\\\":[{\\\\\"text\\\\\":\\\\\"Say OK\\\\\"}]}]}\")",
       "Bash(curl -s \"https://generativelanguage.googleapis.com/v1beta/models?key=AIzaSyAlQ5ZX54SReTyxGp3oV7P5pR5IIb6OsUg\")",
-      "Bash(curl -s -X POST \"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAlQ5ZX54SReTyxGp3oV7P5pR5IIb6OsUg\" -H \"Content-Type: application/json\" -d \"{\\\\\"contents\\\\\":[{\\\\\"parts\\\\\":[{\\\\\"text\\\\\":\\\\\"Say OK\\\\\"}]}]}\")"
+      "Bash(curl -s -X POST \"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAlQ5ZX54SReTyxGp3oV7P5pR5IIb6OsUg\" -H \"Content-Type: application/json\" -d \"{\\\\\"contents\\\\\":[{\\\\\"parts\\\\\":[{\\\\\"text\\\\\":\\\\\"Say OK\\\\\"}]}]}\")",
+      "PowerShell($basePath = \"C:\\\\Users\\\\CODE-D\\\\OneDrive\\\\Desktop\\\\DEV\\\\Node js\\\\SaniShield AI\\\\nexus-backend\\\\src\"; Get-ChildItem -Path $basePath -Directory | ForEach-Object { $count = \\(Get-ChildItem -Path $_.FullPath -File | Where-Object { $_.Extension -eq '.js' } | Measure-Object\\).Count; Write-Output \"$\\($_.Name\\): $count .js files\" })",
+      "Bash(node -e \"require\\('pdfkit'\\); console.log\\('pdfkit OK'\\)\")",
+      "Bash(node -e \"require\\('qrcode'\\); console.log\\('qrcode OK'\\)\")",
+      "Bash(node -e \"const {query} = require\\('./src/config/database'\\); query\\('SELECT district, score FROM community_health_scores LIMIT 5'\\).then\\(r => console.log\\(JSON.stringify\\(r.rows\\)\\)\\).catch\\(e => console.error\\(e.message\\)\\)\")"
     ]
   }
 }
