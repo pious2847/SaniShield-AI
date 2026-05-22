@@ -12,19 +12,47 @@ function getClient() {
   return genAI;
 }
 
-function getModel() {
-  return getClient().getGenerativeModel({ model: 'gemini-2.0-flash' });
+// Model fallback chain — 2.5-flash is primary on this project, 2.0-flash as fallback
+const MODEL_CHAIN = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+
+function getModel(modelId = MODEL_CHAIN[0]) {
+  return getClient().getGenerativeModel({ model: modelId });
+}
+
+function extractRetryDelay(err) {
+  try {
+    const match = err.message?.match(/retryDelay.*?(\d+)s/);
+    if (match) return parseInt(match[1], 10);
+    const secMatch = err.message?.match(/retry in ([\d.]+)s/i);
+    if (secMatch) return Math.ceil(parseFloat(secMatch[1]));
+  } catch {}
+  return 30;
 }
 
 async function safeGenerate(prompt) {
-  try {
-    const model = getModel();
-    const result = await model.generateContent(prompt);
-    return result.response.text();
-  } catch (err) {
-    console.error('[Gemini] Generation error:', err.message);
-    throw err;
+  let lastErr;
+  for (const modelId of MODEL_CHAIN) {
+    try {
+      const model = getModel(modelId);
+      const result = await model.generateContent(prompt);
+      return result.response.text();
+    } catch (err) {
+      lastErr = err;
+      const is429 = err.message?.includes('429') || err.status === 429;
+      if (is429) {
+        console.warn(`[Gemini] 429 on ${modelId}, trying next model…`);
+        continue;
+      }
+      console.error(`[Gemini] Error on ${modelId}:`, err.message);
+      throw err;
+    }
   }
+  // All models exhausted — attach retry info so controller can forward it
+  const retryAfter = extractRetryDelay(lastErr);
+  const rateLimitErr = new Error('Gemini quota exceeded across all models');
+  rateLimitErr.isRateLimit = true;
+  rateLimitErr.retryAfter = retryAfter;
+  throw rateLimitErr;
 }
 
 /**
@@ -288,16 +316,13 @@ CONTEXT: District: ${userContext.district || 'Northern Ghana'}, Language prefere
 Respond ONLY with a valid JSON object:
 {
   "answer": "<clear, practical answer in 2-4 sentences appropriate for rural Northern Ghana>",
-  "tips": [
-    "<practical tip 1>",
-    "<practical tip 2>",
-    "<practical tip 3>"
+  "key_points": [
+    "<practical key point 1>",
+    "<practical key point 2>",
+    "<practical key point 3>"
   ],
-  "references": ["<WHO guideline or UNICEF standard reference if applicable>"],
-  "follow_up_prompts": [
-    "<suggested follow-up question 1>",
-    "<suggested follow-up question 2>"
-  ],
+  "local_context": "<one sentence specific to Northern Ghana communities, climate, or culture>",
+  "language_note": "<optional: note if Dagbani/Twi phrase would help, else null>",
   "urgency": "informational|advisory|urgent"
 }`;
   const text = await safeGenerate(prompt);

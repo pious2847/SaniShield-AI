@@ -21,7 +21,16 @@ async function ask(req, res, next) {
     }
     const answer = await answerHygieneQuestion(question.trim(), { district, language });
     res.json({ success: true, question: question.trim(), data: answer });
-  } catch (e) { next(e); }
+  } catch (e) {
+    if (e.isRateLimit) {
+      return res.status(429).json({
+        success: false,
+        message: 'AI quota reached — please try again shortly.',
+        retryAfter: e.retryAfter ?? 30,
+      });
+    }
+    next(e);
+  }
 }
 
 async function topics(req, res, next) {
