@@ -83,7 +83,26 @@
       "Bash(pnpm --version)",
       "Bash(bun --version)",
       "Bash(pnpm create *)",
-      "Bash(pnpm add *)"
+      "Bash(pnpm add *)",
+      "PowerShell($path = \"c:\\\\Users\\\\CODE-D\\\\OneDrive\\\\Desktop\\\\DEV\\\\Node js\\\\SaniShield AI\\\\nexus-frontend\\\\node_modules\"; if \\(Test-Path $path\\) { \\(Get-ChildItem $path\\).Count } else { \"does not exist\" })",
+      "Bash(pnpm install *)",
+      "Bash(node -e \"const p = require\\('./node_modules/tailwindcss/package.json'\\); console.log\\('tailwindcss:', p.version\\)\")",
+      "Bash(node -e \"const p = require\\('./node_modules/next/package.json'\\); console.log\\('next:', p.version\\)\")",
+      "Bash(node -e \"const p = require\\('./node_modules/framer-motion/package.json'\\); console.log\\('framer-motion:', p.version\\)\")",
+      "PowerShell($store = \"c:\\\\Users\\\\CODE-D\\\\OneDrive\\\\Desktop\\\\DEV\\\\Node js\\\\SaniShield AI\\\\nexus-frontend\\\\node_modules\\\\.pnpm\"; \\(Get-ChildItem $store -ErrorAction SilentlyContinue\\).Count; Get-ChildItem $store -ErrorAction SilentlyContinue | Select-Object -First 10 Name)",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('package.json','utf8'\\)\\); console.log\\('package.json valid'\\)\")",
+      "Bash(pnpm exec *)",
+      "Bash(pnpm dev *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3001)",
+      "Bash(Get-ChildItem -Recurse \"c:\\\\Users\\\\CODE-D\\\\OneDrive\\\\Desktop\\\\DEV\\\\Node js\\\\SaniShield AI\\\\nexus-frontend\\\\src\" -Filter \"*.tsx\")",
+      "Bash(Select-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\CODE-D\\\\OneDrive\\\\Desktop\\\\DEV\\\\Node js\\\\SaniShield AI\\\\nexus-frontend\\\\src\" -Recurse | Where-Object { $_.Extension -in \".tsx\",\".ts\",\".css\" } | Select-Object -ExpandProperty FullName)",
+      "PowerShell(cd \"c:\\\\Users\\\\CODE-D\\\\OneDrive\\\\Desktop\\\\DEV\\\\Node js\\\\SaniShield AI\\\\nexus-frontend\"; npx tsc --noEmit 2>&1 | Where-Object { $_ -match \"error TS\" } | Select-Object -First 30)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\CODE-D\\\\OneDrive\\\\Desktop\\\\DEV\\\\Node js\\\\SaniShield AI\\\\nexus-frontend\\\\src\" -Recurse | Where-Object { $_.Extension -in \".tsx\",\".ts\" } | Select-Object -ExpandProperty FullName | Sort-Object)",
+      "PowerShell(cd \"c:\\\\Users\\\\CODE-D\\\\OneDrive\\\\Desktop\\\\DEV\\\\Node js\\\\SaniShield AI\\\\nexus-backend\"; Get-Process -Name \"node\" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -match \"nexus-backend\" } | Select-Object Id, ProcessName)",
+      "PowerShell(netstat -ano)",
+      "PowerShell(Stop-Process -Id 43608 -Force -ErrorAction SilentlyContinue)"
     ]
   }
 }
