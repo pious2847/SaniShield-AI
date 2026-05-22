@@ -48,7 +48,7 @@ export default function AdminPage() {
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ["admin-users"],
     queryFn: async () => {
-      const { data } = await api.get("/users?limit=30");
+      const { data } = await api.get("/auth/users?limit=30");
       return data.data ?? [];
     },
     staleTime: 2 * 60 * 1000,
