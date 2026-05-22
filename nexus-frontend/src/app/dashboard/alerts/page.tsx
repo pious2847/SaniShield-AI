@@ -6,6 +6,7 @@ import { AlertTriangle } from "lucide-react";
 import { AlertItem } from "@/components/ui/alert-item";
 import { PageSpinner } from "@/components/ui/spinner";
 import { useAlerts } from "@/hooks/useDashboard";
+import { useDistrict } from "@/context/DistrictContext";
 import { cn } from "@/lib/utils";
 import type { Alert } from "@/types";
 
@@ -44,7 +45,7 @@ function filterBtn(active: boolean) {
 }
 
 export default function AlertsPage() {
-  const district = "Tamale Metro";
+  const { district } = useDistrict();
   const [severity, setSeverity] = useState<Severity>("all");
   const [status,   setStatus]   = useState<Status>("active");
 

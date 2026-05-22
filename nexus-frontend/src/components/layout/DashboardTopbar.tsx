@@ -6,14 +6,10 @@ import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { DISTRICTS, type District } from "@/lib/utils";
 import { useAlerts } from "@/hooks/useDashboard";
-import { Badge } from "@/components/ui/badge";
+import { useDistrict } from "@/context/DistrictContext";
 
-interface DashboardTopbarProps {
-  district: District;
-  onDistrictChange: (d: District) => void;
-}
-
-export function DashboardTopbar({ district, onDistrictChange }: DashboardTopbarProps) {
+export function DashboardTopbar() {
+  const { district, setDistrict } = useDistrict();
   const { theme, setTheme } = useTheme();
   const [districtOpen, setDistrictOpen] = useState(false);
   const { data: alerts } = useAlerts(district);
@@ -28,7 +24,6 @@ export function DashboardTopbar({ district, onDistrictChange }: DashboardTopbarP
 
   return (
     <header className="h-16 flex-shrink-0 flex items-center justify-between px-6 bg-[var(--color-surface)] dark:bg-[var(--color-surface-dark)] border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] gap-4">
-      {/* District selector */}
       <div className="relative">
         <button
           onClick={() => setDistrictOpen(!districtOpen)}
@@ -46,7 +41,7 @@ export function DashboardTopbar({ district, onDistrictChange }: DashboardTopbarP
             {DISTRICTS.map((d) => (
               <button
                 key={d}
-                onClick={() => { onDistrictChange(d); setDistrictOpen(false); }}
+                onClick={() => { setDistrict(d as District); setDistrictOpen(false); }}
                 className={cn(
                   "w-full text-left px-4 py-2.5 text-sm font-body transition-colors",
                   d === district
@@ -61,19 +56,15 @@ export function DashboardTopbar({ district, onDistrictChange }: DashboardTopbarP
         )}
       </div>
 
-      {/* Right side */}
       <div className="flex items-center gap-2 ml-auto">
-        {/* Date/time */}
         <span className="hidden md:block text-xs font-mono text-[var(--color-text-3)] dark:text-[var(--color-text-3-dark)]">
           {now}
         </span>
 
-        {/* Search */}
         <button className="w-9 h-9 flex items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text-3)] hover:bg-[var(--color-bg)] dark:hover:bg-[var(--color-bg-dark)] transition-colors">
           <Search className="w-4 h-4" />
         </button>
 
-        {/* Alerts bell */}
         <button className="relative w-9 h-9 flex items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text-3)] hover:bg-[var(--color-bg)] dark:hover:bg-[var(--color-bg-dark)] transition-colors">
           <Bell className="w-4 h-4" />
           {activeAlerts.length > 0 && (
@@ -86,7 +77,6 @@ export function DashboardTopbar({ district, onDistrictChange }: DashboardTopbarP
           )}
         </button>
 
-        {/* Theme toggle */}
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           className="w-9 h-9 flex items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text-3)] hover:bg-[var(--color-bg)] dark:hover:bg-[var(--color-bg-dark)] transition-colors"

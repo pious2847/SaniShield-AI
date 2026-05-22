@@ -6,26 +6,34 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import {
   LayoutDashboard, Map, Droplets, CloudRain, AlertTriangle,
-  GraduationCap, FileBarChart, Radio, Users, Settings,
-  ChevronLeft, ChevronRight, LogOut, Shield,
+  GraduationCap, FileBarChart, Radio, Users, Toilet,
+  ChevronLeft, ChevronRight, LogOut, Shield, Megaphone,
+  CloudSun, Newspaper, Truck, Trash2, BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
-  { href: "/dashboard",          icon: LayoutDashboard, label: "Overview",       exact: true },
-  { href: "/map",                 icon: Map,             label: "Map Explorer" },
-  { href: "/dashboard/sludge",   icon: Droplets,        label: "Sludge Chain" },
-  { href: "/dashboard/floods",   icon: CloudRain,       label: "Flood Assessments" },
-  { href: "/dashboard/alerts",   icon: AlertTriangle,   label: "Alerts" },
-  { href: "/dashboard/schools",  icon: GraduationCap,   label: "Schools MHM" },
-  { href: "/dashboard/reports",  icon: FileBarChart,    label: "Reports" },
-  { href: "/community",          icon: Radio,           label: "Community Watch" },
+  { href: "/dashboard",               icon: LayoutDashboard, label: "Overview",         exact: true },
+  { href: "/map",                      icon: Map,             label: "Map Explorer" },
+  { href: "/dashboard/sludge",        icon: Droplets,        label: "Sludge Chain" },
+  { href: "/dashboard/floods",        icon: CloudRain,       label: "Flood Assessments" },
+  { href: "/dashboard/alerts",        icon: AlertTriangle,   label: "Alerts" },
+  { href: "/dashboard/toilets",       icon: Toilet,          label: "Toilet Registry" },
+  { href: "/dashboard/gatherers",     icon: Truck,           label: "Gatherers" },
+  { href: "/dashboard/dumps",         icon: Trash2,          label: "Dump Sites" },
+  { href: "/dashboard/schools",       icon: GraduationCap,   label: "Schools MHM" },
+  { href: "/dashboard/educator",      icon: BookOpen,        label: "AI Educator" },
+  { href: "/dashboard/broadcasts",    icon: Megaphone,       label: "Broadcasts" },
+  { href: "/dashboard/weather",       icon: CloudSun,        label: "Weather" },
+  { href: "/dashboard/news",          icon: Newspaper,       label: "News" },
+  { href: "/dashboard/reports",       icon: FileBarChart,    label: "Reports" },
+  { href: "/community",               icon: Radio,           label: "Community Watch" },
 ];
 
 const adminItems = [
-  { href: "/admin",  icon: Shield, label: "Admin Panel" },
-  { href: "/admin/users", icon: Users, label: "Users" },
+  { href: "/admin",       icon: Shield, label: "Admin Panel" },
+  { href: "/admin/users", icon: Users,  label: "Users" },
 ];
 
 export function DashboardSidebar() {
@@ -40,8 +48,11 @@ export function DashboardSidebar() {
     <motion.aside
       animate={{ width: collapsed ? 64 : 240 }}
       transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-      className="relative flex-shrink-0 flex flex-col h-full bg-[var(--color-primary)] dark:bg-[var(--color-bg-dark)] border-r border-[var(--color-primary-hover)] dark:border-[var(--color-border-dark)] overflow-hidden"
+      className="relative flex-shrink-0 h-full bg-[var(--color-primary)] dark:bg-[var(--color-bg-dark)] border-r border-[var(--color-primary-hover)] dark:border-[var(--color-border-dark)]"
     >
+      {/* Inner overflow-hidden wrapper so text clips during animation without hiding the toggle button */}
+      <div className="flex flex-col h-full overflow-hidden">
+
       {/* Fugu texture */}
       <div
         className="absolute inset-0 opacity-[0.06]"
@@ -178,7 +189,9 @@ export function DashboardSidebar() {
         </button>
       </div>
 
-      {/* Collapse toggle */}
+      </div>{/* end inner overflow-hidden wrapper */}
+
+      {/* Collapse toggle — outside the overflow-hidden div so it's never clipped */}
       <button
         onClick={() => setCollapsed(!collapsed)}
         className="absolute -right-3 top-20 z-20 w-6 h-6 rounded-full bg-[var(--color-primary-hover)] border border-white/20 flex items-center justify-center text-white/70 hover:text-white transition-colors shadow-[var(--shadow-md)]"

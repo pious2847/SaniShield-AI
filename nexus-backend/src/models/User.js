@@ -46,6 +46,14 @@ class User {
     const { password_hash, ...safe } = user;
     return safe;
   }
+
+  static async toggleActive(id) {
+    const { rows } = await query(
+      'UPDATE users SET is_active = NOT is_active WHERE id=$1 RETURNING id, name, email, role, district, is_active, created_at',
+      [id]
+    );
+    return rows[0] || null;
+  }
 }
 
 module.exports = User;

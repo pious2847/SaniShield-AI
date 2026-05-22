@@ -102,7 +102,10 @@
       "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\CODE-D\\\\OneDrive\\\\Desktop\\\\DEV\\\\Node js\\\\SaniShield AI\\\\nexus-frontend\\\\src\" -Recurse | Where-Object { $_.Extension -in \".tsx\",\".ts\" } | Select-Object -ExpandProperty FullName | Sort-Object)",
       "PowerShell(cd \"c:\\\\Users\\\\CODE-D\\\\OneDrive\\\\Desktop\\\\DEV\\\\Node js\\\\SaniShield AI\\\\nexus-backend\"; Get-Process -Name \"node\" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -match \"nexus-backend\" } | Select-Object Id, ProcessName)",
       "PowerShell(netstat -ano)",
-      "PowerShell(Stop-Process -Id 43608 -Force -ErrorAction SilentlyContinue)"
+      "PowerShell(Stop-Process -Id 43608 -Force -ErrorAction SilentlyContinue)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\CODE-D\\\\OneDrive\\\\Desktop\\\\DEV\\\\Node js\\\\SaniShield AI\\\\nexus-backend\\\\src\\\\routes\" -Recurse -Include \"*.ts\")",
+      "PowerShell(Get-ChildItem \"c:\\\\Users\\\\CODE-D\\\\OneDrive\\\\Desktop\\\\DEV\\\\Node js\\\\SaniShield AI\\\\nexus-frontend\\\\src\\\\app\" -Recurse | Where-Object { $_.PSIsContainer } | Select-Object FullName)",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"C:\\\\Users\\\\CODE-D\\\\OneDrive\\\\Desktop\\\\DEV\\\\Node js\\\\SaniShield AI\\\\nexus-frontend\\\\src\\\\app\\\\admin\\\\users\")"
     ]
   }
 }

@@ -65,4 +65,12 @@ async function listUsers(req, res, next) {
   }
 }
 
-module.exports = { register, login, getProfile, listUsers };
+async function toggleActive(req, res, next) {
+  try {
+    const user = await User.toggleActive(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    res.json({ success: true, data: user });
+  } catch (e) { next(e); }
+}
+
+module.exports = { register, login, getProfile, listUsers, toggleActive };

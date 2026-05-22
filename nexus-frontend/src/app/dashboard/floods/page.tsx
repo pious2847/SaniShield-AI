@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { PageSpinner } from "@/components/ui/spinner";
 import { api } from "@/lib/api";
 import { cn, timeAgo } from "@/lib/utils";
+import { useDistrict } from "@/context/DistrictContext";
 import type { FloodAssessment } from "@/types";
 
 const cardClass =
@@ -163,7 +164,7 @@ function AssessmentCard({ assessment }: { assessment: FloodAssessment }) {
 }
 
 export default function FloodsPage() {
-  const district = "Tamale Metro";
+  const { district } = useDistrict();
   const queryClient = useQueryClient();
   const [triggering, setTriggering] = useState(false);
 

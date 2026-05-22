@@ -43,12 +43,14 @@ export default function ReportPage() {
   const rating            = watch("rating");
 
   const onSubmit = async (values: ReportForm) => {
-    await api.post("/community-reports", {
-      toilet_id:  toiletId || undefined,
-      condition:  values.condition,
-      rating:     values.rating,
-      comment:    values.comment,
-      reporter:   values.reporter,
+    const severityMap: Record<string, string> = {
+      clean: "low", dirty: "moderate", damaged: "high", blocked: "high", no_water: "moderate",
+    };
+    await api.post("/community-watch/report", {
+      report_type:   "toilet_condition",
+      description:   `Condition: ${values.condition}. Rating: ${values.rating}/5.${values.comment ? " " + values.comment : ""}${toiletId ? ` Toilet ID: ${toiletId}` : ""}`,
+      severity:      severityMap[values.condition] ?? "moderate",
+      reporter_name: values.reporter || undefined,
     });
     setSubmitted(true);
   };

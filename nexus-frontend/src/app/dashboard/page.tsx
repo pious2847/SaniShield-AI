@@ -16,6 +16,7 @@ import {
   useToilets,
   useDistrictExport,
 } from "@/hooks/useDashboard";
+import { useDistrict } from "@/context/DistrictContext";
 import { timeAgo } from "@/lib/utils";
 
 const cardClass =
@@ -39,7 +40,7 @@ const floodStatusColor: Record<string, string> = {
 };
 
 export default function DashboardPage() {
-  const district = "Tamale Metro";
+  const { district } = useDistrict();
   const { data: hs, isLoading: hsLoading }       = useHealthScore(district);
   const { data: allAlerts = [], isLoading: aLoad } = useAlerts(district);
   const { data: sludge }                          = useSludgeStats(district);

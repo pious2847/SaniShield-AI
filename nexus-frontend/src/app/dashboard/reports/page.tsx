@@ -9,6 +9,7 @@ import { PageSpinner } from "@/components/ui/spinner";
 import { useDistrictExport } from "@/hooks/useDashboard";
 import { api } from "@/lib/api";
 import { cn, DISTRICTS, timeAgo } from "@/lib/utils";
+import { useDistrict } from "@/context/DistrictContext";
 import type { HealthScore } from "@/types";
 
 const cardClass =
@@ -22,7 +23,8 @@ const csvTypes = [
 ];
 
 export default function ReportsPage() {
-  const [district, setDistrict]         = useState("Tamale Metro");
+  const { district: globalDistrict }    = useDistrict();
+  const [district, setDistrict]         = useState<string>(globalDistrict);
   const [pdfLoading, setPdfLoading]     = useState(false);
   const [csvLoading, setCsvLoading]     = useState<string | null>(null);
   const [lastExport, setLastExport]     = useState<string | null>(null);
@@ -32,7 +34,7 @@ export default function ReportsPage() {
   const { data: hs, isLoading: hsLoading } = useQuery<HealthScore>({
     queryKey: ["health-score", district],
     queryFn: async () => {
-      const { data } = await api.get(`/health-scores/${encodeURIComponent(district)}/latest`);
+      const { data } = await api.get(`/health-scores/${encodeURIComponent(district)}`);
       return data.data;
     },
     enabled: !!district,

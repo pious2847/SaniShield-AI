@@ -7,6 +7,7 @@ import { GraduationCap, Check, X } from "lucide-react";
 import { PageSpinner } from "@/components/ui/spinner";
 import { api } from "@/lib/api";
 import { cn, DISTRICTS } from "@/lib/utils";
+import { useDistrict } from "@/context/DistrictContext";
 
 interface MhmCompliance {
   district: string;
@@ -43,7 +44,8 @@ function BoolBadge({ val }: { val: boolean }) {
 }
 
 export default function SchoolsPage() {
-  const [district, setDistrict] = useState("Tamale Metro");
+  const { district: globalDistrict } = useDistrict();
+  const [district, setDistrict] = useState<string>(globalDistrict);
   const [funcOnly, setFuncOnly] = useState(false);
 
   const { data: compliance = [], isLoading: compLoading } = useQuery<MhmCompliance[]>({

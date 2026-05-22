@@ -6,6 +6,7 @@ import { Droplets, ArrowRight } from "lucide-react";
 import { PageSpinner } from "@/components/ui/spinner";
 import { api } from "@/lib/api";
 import { cn, timeAgo } from "@/lib/utils";
+import { useDistrict } from "@/context/DistrictContext";
 import type { SludgeJob } from "@/types";
 
 const cardClass =
@@ -24,7 +25,7 @@ const statusConfig: Record<string, { label: string; color: string; bg: string }>
 const pipeline = ["pending", "assigned", "accepted", "in_transit", "delivered", "completed"];
 
 export default function SludgePage() {
-  const district = "Tamale Metro";
+  const { district } = useDistrict();
 
   const { data: jobsData, isLoading: jobsLoading } = useQuery({
     queryKey: ["sludge-jobs", district],

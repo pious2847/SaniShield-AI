@@ -8,7 +8,7 @@ export function useHealthScore(district: string) {
   return useQuery<HealthScore>({
     queryKey: ["health-score", district],
     queryFn: async () => {
-      const { data } = await api.get(`/health-scores/${encodeURIComponent(district)}/latest`);
+      const { data } = await api.get(`/health-scores/${encodeURIComponent(district)}`);
       return data.data;
     },
     enabled: !!district,
