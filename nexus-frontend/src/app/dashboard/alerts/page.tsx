@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { AlertItem } from "@/components/ui/alert-item";
 import { PageSpinner } from "@/components/ui/spinner";
+import { Pagination } from "@/components/ui/pagination";
 import {
   useAlerts, useAcknowledgeAlert, useResolveAlert,
 } from "@/hooks/useDashboard";
@@ -71,17 +72,20 @@ export default function AlertsPage() {
   const { district } = useDistrict();
   const [severity, setSeverity] = useState<Severity>("all");
   const [status,   setStatus]   = useState<Status>("active");
+  const [page,     setPage]     = useState(1);
+  const PAGE_SIZE = 25;
 
   const { data: alerts = [], isLoading, dataUpdatedAt, refetch, isFetching } = useAlerts(district);
 
   const ackMut     = useAcknowledgeAlert(district);
   const resolveMut = useResolveAlert(district);
 
-  const filtered = alerts.filter((a: Alert) => {
+  const filtered  = alerts.filter((a: Alert) => {
     const matchSeverity = severity === "all" || a.severity === severity;
     const matchStatus   = status   === "all" || a.status   === status;
     return matchSeverity && matchStatus;
   });
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const criticalCount  = alerts.filter((a: Alert) => a.severity === "critical" && a.status === "active").length;
   const activeCount    = alerts.filter((a: Alert) => a.status === "active").length;
@@ -152,7 +156,7 @@ export default function AlertsPage() {
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-xs font-body font-medium text-[var(--color-text-3)] dark:text-[var(--color-text-3-dark)] mr-0.5">Severity</span>
           {SEVERITY_OPTS.map(({ value, label, dot }) => (
-            <FilterBtn key={value} active={severity === value} onClick={() => setSeverity(value)}>
+            <FilterBtn key={value} active={severity === value} onClick={() => { setSeverity(value); setPage(1); }}>
               {dot && <span className={cn("w-2 h-2 rounded-full", dot)} />}
               {label}
             </FilterBtn>
@@ -162,7 +166,7 @@ export default function AlertsPage() {
         <div className="flex items-center gap-1.5 flex-wrap sm:ml-2 sm:pl-2 sm:border-l sm:border-[var(--color-border)] dark:sm:border-[var(--color-border-dark)]">
           <span className="text-xs font-body font-medium text-[var(--color-text-3)] dark:text-[var(--color-text-3-dark)] mr-0.5">Status</span>
           {STATUS_OPTS.map(({ value, label, icon: SIcon }) => (
-            <FilterBtn key={value} active={status === value} onClick={() => setStatus(value)}>
+            <FilterBtn key={value} active={status === value} onClick={() => { setStatus(value); setPage(1); }}>
               {SIcon && <SIcon className="w-3 h-3" />}
               {label}
             </FilterBtn>
@@ -209,7 +213,7 @@ export default function AlertsPage() {
           className="space-y-2"
         >
           <AnimatePresence mode="popLayout">
-            {filtered.map((alert: Alert) => (
+            {paginated.map((alert: Alert) => (
               <motion.div
                 key={alert.id}
                 layout
@@ -230,9 +234,7 @@ export default function AlertsPage() {
       )}
 
       {!isLoading && filtered.length > 0 && (
-        <p className="text-xs font-body text-center text-[var(--color-text-3)] dark:text-[var(--color-text-3-dark)]">
-          Showing {filtered.length} of {alerts.length} alerts · Auto-refreshes every 30s
-        </p>
+        <Pagination page={page} total={filtered.length} limit={PAGE_SIZE} onChange={setPage} />
       )}
     </motion.div>
   );

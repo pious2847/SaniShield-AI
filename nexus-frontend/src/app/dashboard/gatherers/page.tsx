@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { Truck, User, CheckCircle2, XCircle, Users } from "lucide-react";
 import { PageSpinner } from "@/components/ui/spinner";
+import { Pagination } from "@/components/ui/pagination";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useDistrict } from "@/context/DistrictContext";
@@ -49,6 +50,8 @@ const rowVariants = {
 export default function GatherersPage() {
   const { district } = useDistrict();
   const [availableOnly, setAvailableOnly] = useState(false);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 20;
 
   const { data: gatherers = [], isLoading } = useQuery({
     queryKey: ["gatherers", district],
@@ -68,9 +71,8 @@ export default function GatherersPage() {
   const active    = gatherers.filter((g) => g.is_active).length;
 
   // Filter
-  const filtered = availableOnly
-    ? gatherers.filter((g) => g.is_available)
-    : gatherers;
+  const filtered  = availableOnly ? gatherers.filter((g) => g.is_available) : gatherers;
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <motion.div
@@ -90,7 +92,7 @@ export default function GatherersPage() {
           </p>
         </div>
         <span className="text-xs font-mono text-[var(--color-text-3)] dark:text-[var(--color-text-3-dark)] self-start sm:self-center">
-          {filtered.length} / {total} shown
+          {filtered.length} filtered · {total} total
         </span>
       </div>
 
@@ -238,7 +240,7 @@ export default function GatherersPage() {
                 animate="animate"
                 variants={{ animate: { transition: { staggerChildren: 0.04 } } }}
               >
-                {filtered.map((gatherer) => {
+                {paginated.map((gatherer) => {
                   const completionRate =
                     gatherer.total_jobs > 0
                       ? Math.round((gatherer.completed_jobs / gatherer.total_jobs) * 100)
@@ -333,6 +335,8 @@ export default function GatherersPage() {
           </div>
         )}
       </div>
+
+      <Pagination page={page} total={filtered.length} limit={PAGE_SIZE} onChange={setPage} />
     </motion.div>
   );
 }

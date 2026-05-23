@@ -577,3 +577,29 @@ ALTER TABLE registered_toilets ADD COLUMN IF NOT EXISTS flood_check_status VARCH
 
 ALTER TABLE sanitation_units ADD COLUMN IF NOT EXISTS vulnerability_score INTEGER DEFAULT 0;
 ALTER TABLE sanitation_units ADD COLUMN IF NOT EXISTS vulnerability_factors JSONB;
+
+-- Location discovery tracking
+ALTER TABLE registered_toilets ADD COLUMN IF NOT EXISTS source TEXT DEFAULT 'manual';
+ALTER TABLE registered_toilets ADD COLUMN IF NOT EXISTS external_id TEXT;
+ALTER TABLE waste_facilities    ADD COLUMN IF NOT EXISTS source TEXT DEFAULT 'manual';
+ALTER TABLE waste_facilities    ADD COLUMN IF NOT EXISTS external_id TEXT;
+
+CREATE TABLE IF NOT EXISTS discovery_runs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  run_at TIMESTAMPTZ DEFAULT NOW(),
+  source TEXT NOT NULL DEFAULT 'overpass+google_places',
+  toilets_found INTEGER DEFAULT 0,
+  toilets_saved INTEGER DEFAULT 0,
+  facilities_found INTEGER DEFAULT 0,
+  facilities_saved INTEGER DEFAULT 0,
+  districts_covered TEXT[],
+  duration_ms INTEGER,
+  error TEXT
+);
+
+-- AI post-processing columns for news_articles
+ALTER TABLE news_articles ADD COLUMN IF NOT EXISTS ai_sentiment VARCHAR(20) DEFAULT 'neutral';
+ALTER TABLE news_articles ADD COLUMN IF NOT EXISTS ai_districts TEXT[];
+ALTER TABLE news_articles ADD COLUMN IF NOT EXISTS ai_event_type VARCHAR(50);
+ALTER TABLE news_articles ADD COLUMN IF NOT EXISTS ai_processed BOOLEAN DEFAULT false;
+CREATE INDEX IF NOT EXISTS idx_news_ai_processed ON news_articles(ai_processed);

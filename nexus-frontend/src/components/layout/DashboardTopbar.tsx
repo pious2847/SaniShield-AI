@@ -344,6 +344,7 @@ function CommandPalette({ onClose }: { onClose: () => void }) {
 export function DashboardTopbar() {
   const { district, setDistrict } = useDistrict();
   const { theme, setTheme } = useTheme();
+  const [mounted,      setMounted]        = useState(false);
   const [districtOpen, setDistrictOpen]   = useState(false);
   const [searchOpen, setSearchOpen]       = useState(false);
   const [notifOpen, setNotifOpen]         = useState(false);
@@ -357,6 +358,8 @@ export function DashboardTopbar() {
     weekday: "short", day: "numeric", month: "short",
     hour: "2-digit", minute: "2-digit",
   });
+
+  useEffect(() => { setMounted(true); }, []);
 
   // Cmd/Ctrl+K opens search
   useEffect(() => {
@@ -475,13 +478,19 @@ export function DashboardTopbar() {
             </AnimatePresence>
           </div>
 
-          {/* Theme toggle */}
+          {/* Theme toggle — mounted gate prevents server/client icon mismatch */}
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="w-9 h-9 flex items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text-3)] hover:bg-[var(--color-bg)] dark:hover:bg-[var(--color-bg-dark)] hover:text-[var(--color-text-1)] dark:hover:text-[var(--color-text-1-dark)] transition-colors"
             aria-label="Toggle theme"
           >
-            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            {!mounted ? (
+              <span className="block w-4 h-4" aria-hidden />
+            ) : theme === "dark" ? (
+              <Sun className="w-4 h-4" />
+            ) : (
+              <Moon className="w-4 h-4" />
+            )}
           </button>
         </div>
       </header>

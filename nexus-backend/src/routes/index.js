@@ -32,6 +32,7 @@ router.use('/flood-assessments', require('./floodAssessments'));
 router.use('/simulator', require('./simulator'));
 router.use('/export', require('./export'));
 router.use('/whatsapp', require('./whatsapp'));
+router.use('/discovery', require('./discovery'));
 
 router.get('/health', (req, res) => {
   res.json({

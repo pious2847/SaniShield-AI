@@ -12,6 +12,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { PageSpinner } from "@/components/ui/spinner";
+import { Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { cn, DISTRICTS } from "@/lib/utils";
@@ -92,6 +93,8 @@ export default function ToiletsPage() {
 
   const [conditionFilter, setConditionFilter] = useState<Condition>("all");
   const [verifiedOnly, setVerifiedOnly]       = useState(false);
+  const [page, setPage]                       = useState(1);
+  const PAGE_SIZE = 20;
 
   // Toilets query
   const { data: toilets = [], isLoading } = useQuery({
@@ -138,7 +141,8 @@ export default function ToiletsPage() {
     return matchCondition && matchVerified;
   });
 
-  const maxCount = Math.max(...districtCounts.map((d) => d.total), 1);
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const maxCount  = Math.max(...districtCounts.map((d) => d.total), 1);
 
   return (
     <motion.div
@@ -158,7 +162,7 @@ export default function ToiletsPage() {
           </p>
         </div>
         <span className="text-xs font-mono text-[var(--color-text-3)] dark:text-[var(--color-text-3-dark)] self-start sm:self-center">
-          {filtered.length} / {total} shown
+          {filtered.length} filtered · {total} total
         </span>
       </div>
 
@@ -297,7 +301,7 @@ export default function ToiletsPage() {
                 animate="animate"
                 variants={{ animate: { transition: { staggerChildren: 0.04 } } }}
               >
-                {filtered.map((toilet) => {
+                {paginated.map((toilet) => {
                   const cond = conditionConfig[toilet.condition];
                   const isPending = verifyMutation.isPending &&
                     verifyMutation.variables === toilet.id;
@@ -415,6 +419,8 @@ export default function ToiletsPage() {
           </div>
         )}
       </div>
+
+      <Pagination page={page} total={filtered.length} limit={PAGE_SIZE} onChange={setPage} />
     </motion.div>
   );
 }

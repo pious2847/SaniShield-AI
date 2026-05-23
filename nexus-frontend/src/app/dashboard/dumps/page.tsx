@@ -13,6 +13,7 @@ import {
   AlertOctagon,
 } from "lucide-react";
 import { PageSpinner } from "@/components/ui/spinner";
+import { Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { cn, timeAgo } from "@/lib/utils";
@@ -230,6 +231,8 @@ export default function DumpsPage() {
   const queryClient  = useQueryClient();
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 15;
 
   const { data: dumps = [], isLoading } = useQuery({
     queryKey: ["dumps", district],
@@ -262,9 +265,8 @@ export default function DumpsPage() {
   const resolved = dumps.filter((d) => d.status === "resolved").length;
 
   // Filter
-  const filtered = statusFilter === "all"
-    ? dumps
-    : dumps.filter((d) => d.status === statusFilter);
+  const filtered  = statusFilter === "all" ? dumps : dumps.filter((d) => d.status === statusFilter);
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <motion.div
@@ -347,7 +349,7 @@ export default function DumpsPage() {
           </button>
         ))}
         <span className="text-xs font-mono text-[var(--color-text-3)] dark:text-[var(--color-text-3-dark)] ml-2">
-          {filtered.length} shown
+          {filtered.length} filtered · {total} total
         </span>
       </div>
 
@@ -379,7 +381,7 @@ export default function DumpsPage() {
           variants={{ animate: { transition: { staggerChildren: 0.06 } } }}
           className="space-y-3"
         >
-          {filtered.map((dump) => (
+          {paginated.map((dump) => (
             <DumpCard
               key={dump.id}
               dump={dump}
@@ -395,6 +397,8 @@ export default function DumpsPage() {
           ))}
         </motion.div>
       )}
+
+      <Pagination page={page} total={filtered.length} limit={PAGE_SIZE} onChange={setPage} />
     </motion.div>
   );
 }

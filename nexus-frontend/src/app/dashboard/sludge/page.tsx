@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { Droplets, ArrowRight } from "lucide-react";
 import { PageSpinner } from "@/components/ui/spinner";
+import { Pagination } from "@/components/ui/pagination";
 import { api } from "@/lib/api";
 import { cn, timeAgo } from "@/lib/utils";
 import { useDistrict } from "@/context/DistrictContext";
@@ -47,7 +49,11 @@ export default function SludgePage() {
     staleTime: 60 * 1000,
   });
 
-  const jobs = jobsData ?? [];
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 20;
+
+  const jobs      = jobsData ?? [];
+  const paginated = jobs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const districtStats = statsData?.find((r) => r.district === district);
   const rate = districtStats?.completion_rate ?? 0;
 
@@ -164,7 +170,7 @@ export default function SludgePage() {
                 </tr>
               </thead>
               <tbody>
-                {jobs.map((job, idx) => {
+                {paginated.map((job, idx) => {
                   const cfg = statusConfig[job.status] ?? statusConfig.pending;
                   return (
                     <motion.tr
@@ -202,6 +208,8 @@ export default function SludgePage() {
           </div>
         )}
       </div>
+
+      <Pagination page={page} total={jobs.length} limit={PAGE_SIZE} onChange={setPage} />
     </motion.div>
   );
 }

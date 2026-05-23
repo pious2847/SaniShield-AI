@@ -5,6 +5,7 @@ const { computeAllDistricts, DISTRICTS } = require('./healthScoreService');
 const { assessRiskBatch } = require('./geminiService');
 const { checkAndTrigger, FLOOD_THRESHOLD_MM } = require('./floodAssessmentService');
 const { scoreAll } = require('./vulnerabilityService');
+const { runDiscovery } = require('./locationDiscoveryService');
 const WeatherHistory = require('../models/WeatherHistory');
 const SanitationUnit = require('../models/SanitationUnit');
 const SensorReading = require('../models/SensorReading');
@@ -24,7 +25,8 @@ async function runWeatherArchive() {
   let success = 0;
   for (const district of DISTRICTS) {
     try {
-      await getWeatherForDistrict(district);
+      // forceArchive bypasses the 2h cache so every cron run generates a fresh DB record
+      await getWeatherForDistrict(district, { forceArchive: true });
       success++;
     } catch (err) {
       console.error(`[Cron:Weather] ${district} error:`, err.message);
@@ -130,6 +132,18 @@ async function runVulnerabilityScoring() {
   }
 }
 
+async function runLocationDiscovery() {
+  console.log('[Cron:Discovery] Starting agentic location discovery...');
+  recordRun('location_discovery');
+  try {
+    const result = await runDiscovery();
+    const s = result.stats;
+    console.log(`[Cron:Discovery] Done — OSM: ${s.overpass.toilets_saved}t/${s.overpass.facilities_saved}f saved, Places: ${s.google.toilets_saved}t/${s.google.facilities_saved}f saved`);
+  } catch (err) {
+    console.error('[Cron:Discovery] Error:', err.message);
+  }
+}
+
 function startAllCrons(io) {
   // Every 2 hours — weather archive
   cron.schedule('0 */2 * * *', () => runWeatherArchive(), { name: 'weather-archive' });
@@ -139,9 +153,9 @@ function startAllCrons(io) {
   cron.schedule('0 */6 * * *', () => runRiskAssessment(io), { name: 'risk-assessment' });
   console.log('[Cron] Scheduled: risk assessment (every 6h)');
 
-  // Every 12 hours — news crawl
-  cron.schedule('0 */12 * * *', () => runNewsCrawl(), { name: 'news-crawl' });
-  console.log('[Cron] Scheduled: news crawl (every 12h)');
+  // Every 2 hours — news crawl (frequent enough to catch breaking flood/cholera events)
+  cron.schedule('0 */2 * * *', () => runNewsCrawl(), { name: 'news-crawl' });
+  console.log('[Cron] Scheduled: news crawl (every 2h)');
 
   // Daily at 2am — health scores
   cron.schedule('0 2 * * *', () => runHealthScores(), { name: 'health-scores' });
@@ -155,6 +169,10 @@ function startAllCrons(io) {
   cron.schedule('0 3 * * 0', () => runVulnerabilityScoring(), { name: 'vulnerability-scoring' });
   console.log('[Cron] Scheduled: vulnerability scoring (weekly Sun 3am)');
 
+  // Weekly Monday 2am — agentic location discovery (Overpass + Google Places)
+  cron.schedule('0 2 * * 1', () => runLocationDiscovery(), { name: 'location-discovery' });
+  console.log('[Cron] Scheduled: location discovery (weekly Mon 2am)');
+
   // Run weather immediately on startup (non-blocking)
   setTimeout(() => runWeatherArchive(), 5000);
 }
@@ -164,12 +182,13 @@ function getCronStatus() {
     jobs: [
       { name: 'weather-archive', schedule: 'every 2 hours', ...jobStatus['weather'] },
       { name: 'risk-assessment', schedule: 'every 6 hours', ...jobStatus['risk_assessment'] },
-      { name: 'news-crawl', schedule: 'every 12 hours', ...jobStatus['news_crawl'] },
+      { name: 'news-crawl', schedule: 'every 2 hours', ...jobStatus['news_crawl'] },
       { name: 'health-scores', schedule: 'daily at 2am', ...jobStatus['health_scores'] },
       { name: 'flood-check', schedule: 'every 3 hours', ...jobStatus['flood_check'] },
       { name: 'vulnerability-scoring', schedule: 'weekly Sunday 3am', ...jobStatus['vulnerability_scoring'] },
+      { name: 'location-discovery',    schedule: 'weekly Monday 2am', ...jobStatus['location_discovery'] },
     ],
   };
 }
 
-module.exports = { startAllCrons, getCronStatus };
+module.exports = { startAllCrons, getCronStatus, runLocationDiscovery };

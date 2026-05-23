@@ -23,15 +23,17 @@ function getCurrentSeason(month = new Date().getMonth() + 1) {
   return month >= 4 && month <= 10 ? 'wet season (April–October)' : 'dry season (November–March)';
 }
 
-async function getWeatherForCoords(lat, lon, district) {
-  // Check cache
-  const cached = await query(
-    `SELECT * FROM weather_cache WHERE district = $1 AND expires_at > NOW() ORDER BY fetched_at DESC LIMIT 1`,
-    [district]
-  );
-  if (cached.rows.length) {
-    const data = cached.rows[0].weather_data;
-    return typeof data === 'string' ? JSON.parse(data) : data;
+async function getWeatherForCoords(lat, lon, district, { forceArchive = false } = {}) {
+  // Check cache (skipped when forceArchive is true so cron always gets fresh data)
+  if (!forceArchive) {
+    const cached = await query(
+      `SELECT * FROM weather_cache WHERE district = $1 AND expires_at > NOW() ORDER BY fetched_at DESC LIMIT 1`,
+      [district]
+    );
+    if (cached.rows.length) {
+      const data = cached.rows[0].weather_data;
+      return typeof data === 'string' ? JSON.parse(data) : data;
+    }
   }
 
   const response = await axios.get(OPEN_METEO_URL, {
@@ -96,9 +98,9 @@ async function getWeatherForCoords(lat, lon, district) {
   return weatherData;
 }
 
-async function getWeatherForDistrict(district) {
+async function getWeatherForDistrict(district, opts = {}) {
   const coords = DISTRICT_COORDS[district] || DISTRICT_COORDS['default'];
-  return getWeatherForCoords(coords.lat, coords.lon, district);
+  return getWeatherForCoords(coords.lat, coords.lon, district, opts);
 }
 
 async function getWeatherForUnit(unit) {

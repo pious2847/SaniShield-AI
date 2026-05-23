@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -9,16 +9,17 @@ import {
   Map, Layers, ChevronLeft, Toilet, Activity, AlertTriangle,
   Droplets, Truck, Building2, X, Search, Info,
   TriangleAlert, Thermometer, ChevronDown,
+  Crosshair, RotateCcw, Maximize2, Minimize2,
 } from "lucide-react";
 import { PageSpinner } from "@/components/ui/spinner";
 import { api } from "@/lib/api";
 import { cn, DISTRICTS } from "@/lib/utils";
 import type { GeoFeatureCollection, GeoFeature } from "@/types";
-import type { MapLayer } from "@/components/map/LeafletMap";
+import type { MapLayer, MapType, MapHandle } from "@/components/map/LeafletMap";
 
 const LeafletMap = dynamic(
   () => import("@/components/map/LeafletMap").then((m) => m.LeafletMap),
-  { ssr: false, loading: () => <div className="flex-1 flex items-center justify-center bg-(--color-bg)"><PageSpinner /></div> }
+  { ssr: false, loading: () => <div className="flex-1 min-h-0 flex items-center justify-center bg-(--color-bg) dark:bg-[#0d1117]"><PageSpinner /></div> }
 );
 
 // ── Layer definitions ─────────────────────────────────────────────────────────
@@ -46,6 +47,13 @@ const VULN_LEGEND = [
   { label: "High (50–74)",      color: "#dd6b20" },
   { label: "Moderate (25–49)",  color: "#d69e2e" },
   { label: "Low (<25)",         color: "#38a169" },
+];
+
+const MAP_TYPES: { key: MapType; label: string }[] = [
+  { key: "roadmap",   label: "Road" },
+  { key: "satellite", label: "Satellite" },
+  { key: "hybrid",    label: "Hybrid" },
+  { key: "terrain",   label: "Terrain" },
 ];
 
 // ── Feature detail panel ──────────────────────────────────────────────────────
@@ -174,6 +182,24 @@ export default function MapPage() {
   const [selected,        setSelected]        = useState<{ feature: GeoFeature; layerKey: string } | null>(null);
   const [showAllDistricts, setShowAllDistricts] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const [mapType,         setMapType]         = useState<MapType>("roadmap");
+  const [isFullscreen,    setIsFullscreen]    = useState(false);
+  const mapHandleRef  = useRef<MapHandle | null>(null);
+  const mapSectionRef = useRef<HTMLDivElement>(null);
+
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      mapSectionRef.current?.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  }, []);
+
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
 
   const effectiveDistrict = showAllDistricts ? undefined : district;
 
@@ -192,7 +218,7 @@ export default function MapPage() {
         staleTime: 3 * 60 * 1000,
       }),
     ])
-  ) as Record<LayerKey, { data?: GeoFeatureCollection; isFetching: boolean; isError: boolean }>;
+  ) as unknown as Record<LayerKey, { data?: GeoFeatureCollection; isFetching: boolean; isError: boolean }>;
 
   const toggleLayer = (key: LayerKey) => {
     setActiveLayers((prev) => {
@@ -297,12 +323,14 @@ export default function MapPage() {
       </header>
 
       {/* ── Map + panels ── */}
-      <div className="flex-1 flex overflow-hidden min-h-0 relative">
+      <div ref={mapSectionRef} className="flex-1 flex overflow-hidden min-h-0 relative">
         <LeafletMap
           layers={mapLayers}
           center={[9.4038, -0.8424]}
           zoom={11}
+          mapType={mapType}
           onFeatureClick={handleFeatureClick}
+          onMapReady={(h) => { mapHandleRef.current = h; }}
         />
 
         {/* Search bar overlay */}
@@ -323,6 +351,51 @@ export default function MapPage() {
               )}
             />
           </div>
+        </div>
+
+        {/* ── Map type switcher ── */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[999]">
+          <div className={cn("flex items-center gap-0.5 p-0.5 rounded-lg", overlayPill)}>
+            {MAP_TYPES.map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setMapType(key)}
+                className={cn(
+                  "px-3 py-1 rounded-md text-[11px] font-body font-medium transition-all",
+                  mapType === key
+                    ? "bg-[#27AE60] text-white shadow-sm"
+                    : "text-(--color-text-2) dark:text-gray-400 hover:text-(--color-text-1) dark:hover:text-gray-200"
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Tool buttons ── */}
+        <div className="absolute top-14 left-3 z-[999] flex flex-col gap-1.5">
+          <button
+            title="Zoom to fit all markers"
+            onClick={() => mapHandleRef.current?.zoomToFit()}
+            className={cn("w-8 h-8 flex items-center justify-center rounded", overlayPill, "hover:text-[#27AE60] transition-colors text-(--color-text-2) dark:text-gray-400")}
+          >
+            <Crosshair className="w-3.5 h-3.5" />
+          </button>
+          <button
+            title="Reset to default view"
+            onClick={() => mapHandleRef.current?.resetView()}
+            className={cn("w-8 h-8 flex items-center justify-center rounded", overlayPill, "hover:text-[#27AE60] transition-colors text-(--color-text-2) dark:text-gray-400")}
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+          </button>
+          <button
+            title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            onClick={toggleFullscreen}
+            className={cn("w-8 h-8 flex items-center justify-center rounded", overlayPill, "hover:text-[#27AE60] transition-colors text-(--color-text-2) dark:text-gray-400")}
+          >
+            {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+          </button>
         </div>
 
         {/* Stats overlay (bottom-left) */}

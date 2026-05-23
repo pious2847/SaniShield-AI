@@ -24,16 +24,25 @@ class NewsArticle {
     }
   }
 
-  static async findAll({ is_flood_related, is_sanitation_related, limit=20 } = {}) {
+  static async findAll({ is_flood_related, is_sanitation_related, limit=20, offset=0 } = {}) {
     const conds=[]; const params=[];
     if (is_flood_related!==undefined) { conds.push(`is_flood_related=$${params.length+1}`); params.push(!!is_flood_related); }
     if (is_sanitation_related!==undefined) { conds.push(`is_sanitation_related=$${params.length+1}`); params.push(!!is_sanitation_related); }
-    params.push(limit);
     const where = conds.length ? `WHERE ${conds.join(' AND ')}` : '';
+    params.push(limit); params.push(offset);
     const { rows } = await query(
-      `SELECT * FROM news_articles ${where} ORDER BY published_at DESC NULLS LAST LIMIT $${params.length}`, params
+      `SELECT * FROM news_articles ${where} ORDER BY published_at DESC NULLS LAST LIMIT $${params.length-1} OFFSET $${params.length}`, params
     );
     return rows;
+  }
+
+  static async count({ is_flood_related, is_sanitation_related } = {}) {
+    const conds=[]; const params=[];
+    if (is_flood_related!==undefined) { conds.push(`is_flood_related=$${params.length+1}`); params.push(!!is_flood_related); }
+    if (is_sanitation_related!==undefined) { conds.push(`is_sanitation_related=$${params.length+1}`); params.push(!!is_sanitation_related); }
+    const where = conds.length ? `WHERE ${conds.join(' AND ')}` : '';
+    const { rows } = await query(`SELECT COUNT(*) AS c FROM news_articles ${where}`, params);
+    return parseInt(rows[0].c);
   }
 
   static async findById(id) {
@@ -46,16 +55,34 @@ class NewsArticle {
     return rows.length > 0;
   }
 
-  static async updateAi(id, aiSummary, aiTags, isFlood, isSanitation) {
+  static async updateAi(id, { sentiment, districts, eventType, summary, tags, isFlood, isSanitation }) {
     await query(
-      `UPDATE news_articles SET ai_summary=$1, ai_tags=$2, is_flood_related=$3, is_sanitation_related=$4 WHERE id=$5`,
-      [aiSummary, aiTags, isFlood, isSanitation, id]
+      `UPDATE news_articles SET
+        ai_sentiment=$1, ai_districts=$2, ai_event_type=$3,
+        ai_summary=$4, ai_tags=$5,
+        is_flood_related=COALESCE($6, is_flood_related),
+        is_sanitation_related=COALESCE($7, is_sanitation_related),
+        ai_processed=true
+       WHERE id=$8`,
+      [sentiment||'neutral', districts||null, eventType||null,
+       summary||null, tags||null, isFlood, isSanitation, id]
     );
+  }
+
+  static async findUnprocessed(limit=10) {
+    const { rows } = await query(
+      `SELECT id, headline, summary, source_name, is_flood_related, is_sanitation_related
+       FROM news_articles WHERE ai_processed=false OR ai_processed IS NULL
+       ORDER BY published_at DESC NULLS LAST LIMIT $1`, [limit]
+    );
+    return rows;
   }
 
   static async recent(limit=5) {
     const { rows } = await query(
-      `SELECT headline, summary, source_name, published_at, ai_summary, ai_tags, is_flood_related
+      `SELECT id, headline, summary, source_name, source_url, published_at,
+              ai_summary, ai_tags, ai_sentiment, ai_districts, ai_event_type,
+              is_flood_related, is_sanitation_related, ai_processed
        FROM news_articles ORDER BY published_at DESC NULLS LAST LIMIT $1`, [limit]
     );
     return rows;

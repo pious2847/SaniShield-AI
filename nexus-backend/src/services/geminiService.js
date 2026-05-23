@@ -540,7 +540,47 @@ Respond ONLY with a valid JSON object:
   return parseJsonResponse(text);
 }
 
+const NORTHERN_DISTRICTS = [
+  'Tamale Metro','Sagnarigu','Tolon','Kumbungu','Nanton','Savelugu','Karaga',
+  'Gushegu','Yendi','Northern','Bolgatanga','Navrongo','Bawku','Wa','Damongo',
+  'Bole','Salaga','Nalerigu','Gambaga','Walewale','Savannah','Upper East','Upper West','North East',
+];
+
+async function processNewsArticle(article) {
+  const prompt = `You are the AI intelligence engine for N.E.X.U.S., a sanitation monitoring platform in Northern Ghana.
+
+Analyze this news article and extract structured information for the NEXUS platform.
+
+Article:
+HEADLINE: ${article.headline}
+SOURCE: ${article.source_name}
+SUMMARY: ${article.summary || '(no summary)'}
+
+Known Northern Ghana districts/regions: ${NORTHERN_DISTRICTS.join(', ')}
+
+Respond ONLY with a valid JSON object:
+{
+  "sentiment": "positive|negative|neutral",
+  "event_type": "flood|cholera_outbreak|sanitation_failure|infrastructure_damage|disease_alert|policy_announcement|community_initiative|general",
+  "affected_districts": ["list only Northern Ghana districts/regions mentioned, empty array if none"],
+  "nexus_summary": "<1-2 sentence summary focused on WASH/sanitation/flood impact for Northern Ghana field workers>",
+  "is_flood_related": true|false,
+  "is_sanitation_related": true|false,
+  "relevance_score": <0-10, 10 = directly about Northern Ghana WASH crisis>,
+  "suggested_sources": ["<any news source URLs or RSS feed URLs mentioned or linked in the article that could be valuable for future crawling — empty array if none>"]
+}`;
+  try {
+    const text = await safeGenerate(prompt);
+    return parseJsonResponse(text);
+  } catch (err) {
+    console.error('[Gemini] processNewsArticle error:', err.message);
+    return null;
+  }
+}
+
 module.exports = {
+  safeGenerate,
+  processNewsArticle,
   predictOverflowRisk,
   predictFloodRisk,
   generateMaintenancePlan,
@@ -555,4 +595,5 @@ module.exports = {
   summarizeNewsForContext,
   generateBlogPost,
   assessInfrastructureVulnerability,
+  processNewsArticle,
 };

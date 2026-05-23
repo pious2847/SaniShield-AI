@@ -21,6 +21,8 @@ export function useHealthScore(district: string) {
     enabled: !!district,
     staleTime: 5 * 60 * 1000,
     retry: false,
+    refetchInterval: (query) =>
+      (query.state.data as { pending?: boolean } | null)?.pending ? 5000 : false,
   });
 }
 

@@ -11,7 +11,7 @@ async function gatherDistrictData(district) {
   const [toilets, alerts, dumps, odRows, weatherRow, unitRows] = await Promise.all([
     query(`SELECT COUNT(*) AS c, AVG(CASE WHEN condition IN ('good','fair') THEN 1.0 ELSE 0 END)*100 AS pct
            FROM registered_toilets WHERE district=$1`, [district]),
-    query(`SELECT COUNT(*) AS c FROM alerts WHERE district=$1 AND status='active'`, [district]),
+    query(`SELECT COUNT(*) AS c FROM alerts a JOIN sanitation_units su ON a.unit_id=su.id WHERE su.district=$1 AND a.status='active'`, [district]),
     query(`SELECT COUNT(*) AS c FROM illegal_dump_sites WHERE district=$1 AND status='open'`, [district]),
     query(`SELECT COUNT(*) AS c FROM od_events WHERE district=$1 AND created_at>=NOW()-INTERVAL '24 hours'`, [district]),
     query(`SELECT AVG(precipitation_mm) AS avg_precip FROM weather_history
