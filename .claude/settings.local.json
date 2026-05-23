@@ -154,7 +154,8 @@
       "Bash(curl -s http://localhost:5000/api/v1/news?limit=50 -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijg0M2YxMTY1LTZiZTAtNGUwMC05OTVmLTM2YWU1MjRhNTAxNCIsImVtYWlsIjoiYWRtaW5AbmV4dXMuZ2giLCJyb2xlIjoiYWRtaW4iLCJuYW1lIjoiQWJkdWwgUmFobWFuIiwiaWF0IjoxNzc5NTIwOTQ5LCJleHAiOjE3ODAxMjU3NDl9.CkhtAwyyabv9uKW-0uGCPmfhfuDXU91Rvv_m5Dj_L40')",
       "Bash(for f in toilets dumps gatherers sludge floods schools; do *)",
       "Read(//c/Users/CODE-D/OneDrive/Desktop/DEV/Node js/SaniShield AI/nexus-frontend/src/app/dashboard$f/**)",
-      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('status'\\)\\)\")"
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('status'\\)\\)\")",
+      "Bash(pnpm build *)"
     ]
   }
 }
