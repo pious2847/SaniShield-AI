@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
@@ -27,7 +27,7 @@ const conditions: Array<{ value: ReportForm["condition"]; label: string; emoji: 
   { value: "no_water", label: "No Water Available",  emoji: "💧", color: "border-blue-500 bg-blue-50 dark:bg-blue-950" },
 ];
 
-export default function ReportPage() {
+function ReportPageInner() {
   const searchParams  = useSearchParams();
   const toiletId      = searchParams.get("toilet_id") ?? "";
   const [submitted, setSubmitted]   = useState(false);
@@ -217,5 +217,13 @@ export default function ReportPage() {
         </AnimatePresence>
       </div>
     </div>
+  );
+}
+
+export default function ReportPage() {
+  return (
+    <Suspense>
+      <ReportPageInner />
+    </Suspense>
   );
 }

@@ -170,7 +170,7 @@ export default function ReportsPage() {
         </p>
         {hsLoading ? (
           <div className="flex justify-center py-6"><PageSpinner /></div>
-        ) : hs ? (
+        ) : hs && hs.score != null ? (
           <div className="flex flex-col sm:flex-row gap-5 items-start">
             <div className="flex-shrink-0 text-center px-4 py-3 rounded-[var(--radius-md)] bg-[var(--color-bg)] dark:bg-[var(--color-bg-dark)]">
               <p className={cn(
@@ -186,7 +186,7 @@ export default function ReportsPage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-body text-[var(--color-text-3)] dark:text-[var(--color-text-3-dark)] mb-2">
-                Calculated {timeAgo(hs.calculated_at)}
+                Calculated {timeAgo(hs.computed_at)}
               </p>
               <p className="text-sm font-body italic text-[var(--color-text-2)] dark:text-[var(--color-text-2-dark)] leading-relaxed">
                 {hs.ai_narrative}
