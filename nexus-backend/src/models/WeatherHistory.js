@@ -1,5 +1,5 @@
 const { query } = require('../config/database');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID: uuidv4 } = require('crypto');
 
 class WeatherHistory {
   static async save(data) {

@@ -1,6 +1,6 @@
 const axios = require('axios');
 const { query } = require('../config/database');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID: uuidv4 } = require('crypto');
 const WeatherHistory = require('../models/WeatherHistory');
 
 const OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast';
